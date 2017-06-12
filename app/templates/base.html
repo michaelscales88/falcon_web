@@ -2,15 +2,15 @@
 <html lang="en">
 <head>
     {% if title %}
-    <title>{{ title }} - microblog</title>
+    <title>{{ title }} - Falcon Reporting</title>
     {% else %}
-    <title>microblog</title>
+    <title>Falcon Reporting</title>
     {% endif %}
   </head>
   <body>
-    <div>Microblog: <a href="/index">Home</a></div>
+    <div>Falcon Reporting: <a href="/index">Home</a></div>
     <hr>
-    {% with messages = get_flashed_messages() %}
+    {% with messages = get_flashed_messages() %}    <!--This is perfect for redirecting after an insert -->
       {% if messages %}
         <ul>
         {% for message in messages %}
