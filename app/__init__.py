@@ -1,19 +1,26 @@
 from flask import Flask
 from flask_sqlalchemy import SQLAlchemy
 from flask_mail import Mail
-
-
 from flask_login import LoginManager
 
+from .momentjs import MomentJs
+
 app = Flask(__name__, instance_relative_config=True)
+
 # Load the default configuration
 app.config.from_object('app.configmodule.DevelopmentConfig')
-print(app.config['ADMINS'])
+
 # Load the configuration from the instance folder
-app.config.from_pyfile('config.cfg')
-print(app.config['ADMINS'])
+app.config.from_pyfile('config.cfg', silent=True)
+
+# create app dB
 db = SQLAlchemy(app)
+
+# Mailing service
 mail = Mail(app)
+
+# Render UTC dates based on browser settings
+app.jinja_env.globals['momentjs'] = MomentJs
 
 lm = LoginManager()
 lm.init_app(app)
