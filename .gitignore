@@ -98,3 +98,4 @@ ENV/
 # dB Stuff
 *.db
 db_repository/
+tmp/

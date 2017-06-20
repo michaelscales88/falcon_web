@@ -57,7 +57,10 @@ class User(Base):
 
     @classmethod
     def get(cls, id):
-        return cls.query.get(id)
+        try:
+            return cls.query.get(id)
+        except KeyError:
+            return None
 
     def avatar(self, size):
         return 'http://www.gravatar.com/avatar/{avatar}?d=mm&s={size}'.format(
@@ -91,9 +94,18 @@ class User(Base):
         return self.followed.filter(followers.c.followed_id == user.id).count() > 0
 
     def followed_posts(self):
-        return Post.query.join(followers, (followers.c.followed_id == Post.user_id)).filter(
-            followers.c.follower_id == self.id).order_by(Post.timestamp.desc())
-
+        return (
+            Post
+            .query
+            .join(
+                followers, (followers.c.followed_id == Post.user_id)    # Join table, Join condition
+            ).filter(
+                followers.c.follower_id == self.id
+            )
+            .order_by(
+                Post.timestamp.desc()
+            )
+        )
 
 
 class Post(Base):

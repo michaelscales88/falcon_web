@@ -41,7 +41,7 @@ def index(page=1):
         db.session.commit()
         flash('Your post is now live!')
         return redirect(url_for('index'))
-    posts = g.user.posts.paginate(page, 5, False)
+    posts = g.user.followed_posts().paginate(page, app.config['POSTS_PER_PAGE'], False)
     return render_template('index.html',
                            title='Home',
                            form=form,
@@ -73,7 +73,7 @@ def user(nickname, page=1):
     if user is None:
         flash('User %s not found.' % nickname)
         return redirect(url_for('index'))
-    posts = g.user.posts.paginate(page, 5, False)
+    posts = user.posts.paginate(page, app.config['POSTS_PER_PAGE'], False)
     return render_template('user.html',
                            user=user,
                            posts=posts)
@@ -103,13 +103,25 @@ def login():
 
     form = LoginForm()
     if form.validate_on_submit():
-        user = User.query.filter_by(email=str(form.login.data)).first()
+        user_email = str(form.login.data)
+        user = User.query.filter_by(email=user_email).first()
+        # remember_me = False
+        # if 'remember_me' in session:
+        #     remember_me = session['remember_me']
+        #     session.pop('remember_me', None)
+        # login_user(user, remember=remember_me)
+        if not user:
+            nickname = user_email.split('@')[0]
+            nickname = User.make_unique_nickname(nickname)
+            user = User(nickname=nickname, email=user_email)
+            db.session.add(user)
+            db.session.commit()
+            # make the user follow him/herself
+            db.session.add(user.follow(user))
+            db.session.commit()
 
-        if user:
-            login_user(user)
-            flash('Logged in successfully.')
-        else:
-            flash('No user found.')
+        login_user(user)
+        flash('Logged in successfully.')
 
         next = request.args.get('next')
         if not is_safe_url(next):
